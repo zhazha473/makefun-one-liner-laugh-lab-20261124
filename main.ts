@@ -20,7 +20,7 @@
 const JOKE =
   "I printed all 200 pages in invisible ink so no one can steal your report — the cartridge is full, the paper is just classified. My display still insists: 'Print successful.'";
 
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 
 function main(): void {
   // The entry must be exactly one line, 1-200 characters.
@@ -29,6 +29,13 @@ function main(): void {
   }
   mkdirSync("/output", { recursive: true });
   writeFileSync("/output/entry.txt", JOKE, "utf-8");
+  // Read back what was written and confirm it is byte-for-byte the
+  // joke: a grader that reads a truncated or altered file must fail
+  // loudly here, not silently submit a different line.
+  const written = readFileSync("/output/entry.txt", "utf-8");
+  if (written !== JOKE) {
+    throw new Error("entry.txt does not match the joke");
+  }
 }
 
 main();
